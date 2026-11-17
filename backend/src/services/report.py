@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from src.models.source import Source,Policy
 from src.models.run import Run
 from src.services.audit import log
+from src.services.privacy import ensure_budget
 from src.config.settings import REDIS_URL
 import redis
 def submit(db,user,body):
@@ -21,4 +22,4 @@ def approve(db,user,id,note):
  if not obj: raise HTTPException(404,'报告不存在')
  if obj.status!='completed': raise HTTPException(409,'仅可复核已完成报告')
  if obj.approved: raise HTTPException(409,'报告已经复核')
- obj.approved=True;obj.review=note;log(db,user.email,'run.approve',id);db.commit();return obj
+ obj.approved=True;obj.review=note;ensure_budget(db,id);log(db,user.email,'run.approve',id);db.commit();return obj
